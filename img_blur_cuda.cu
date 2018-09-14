@@ -42,13 +42,9 @@ __global__ void blur(unsigned char *original_image, unsigned char *copy_image, i
 
 void image_blur(const cv::Mat& input, cv::Mat& output){
 
-  // the input.step gets the number of bytes for each row
-	cout << "Input image step: " << input.step << " rows: " << input.rows << " cols: " << input.cols << endl;
-	// Calculate total number of bytes of input and output image
-	// Step = cols * number of colors
+
 	size_t colorBytes = input.step * input.rows;
 	size_t blurredBytes = output.step * output.rows;
-  // size_t filterBytes = g_FILTER_SIZE * g_FILTER_SIZE;
 
 	unsigned char *d_input, *d_output;
 
@@ -56,32 +52,21 @@ void image_blur(const cv::Mat& input, cv::Mat& output){
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_input, colorBytes), "CUDA Malloc Failed");
 	SAFE_CALL(cudaMalloc<unsigned char>(&d_output, blurredBytes), "CUDA Malloc Failed");
 
-	// Copy data from OpenCV input image to device memory
 	SAFE_CALL(cudaMemcpy(d_input, input.ptr(), colorBytes, cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
 
-  // Copy data from host to device constant memory
-  //SAFE_CALL(cudaMemcpyToSymbol(cst_filter, host_filter, filterBytes), "CUDA Memcpy Host To Device Constant Memory Failed");
+  
+	const dim3 block(64, 64);
 
-	// Specify a reasonable block size
-	const dim3 block(16, 16);
-
-	// Calculate grid size to cover the whole image
-	// const dim3 grid((input.cols + block.x - 1) / block.x, (input.rows + block.y - 1) / block.y);
 	const dim3 grid((int)ceil((float)input.rows / block.x), (int)ceil((float)input.cols/ block.y));
 	printf("image_blur_kernel<<<(%d, %d) , (%d, %d)>>>\n", grid.x, grid.y, block.x, block.y);
 
   auto start_cpu = chrono::high_resolution_clock::now();
-	// Launch the color conversion kernel
 	blur <<<grid, block >>>(d_input, d_output, input.cols, input.rows, static_cast<int>(input.step), input.channels());
-
-	// Synchronize to check for any kernel launch errors
 	SAFE_CALL(cudaDeviceSynchronize(), "Kernel Launch Failed");
-
   auto end_cpu = chrono::high_resolution_clock::now();
-	// Copy back data from destination device meory to OpenCV output image
+
 	SAFE_CALL(cudaMemcpy(output.ptr(), d_output, blurredBytes, cudaMemcpyDeviceToHost), "CUDA Memcpy Host To Device Failed");
 
-	// Free the device memory
 	SAFE_CALL(cudaFree(d_input), "CUDA Free Failed");
   SAFE_CALL(cudaFree(d_output), "CUDA Free Failed");
   
@@ -97,7 +82,6 @@ int main(int argc, char *argv[]){
 	string imagePath;
   (argc < 2) ? imagePath = "image.jpg" : imagePath = argv[1];
 
-	// Read input image from the disk
 	Mat input = imread(imagePath, CV_LOAD_IMAGE_COLOR);
 
 	if (input.empty()){
