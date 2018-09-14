@@ -93,7 +93,13 @@ int main(int argc, char *argv[]){
 	Mat output = input.clone();
 
 	image_blur(input, output);
-  cv::imwrite("output.jpg", output);
+  
+  imwrite("output.jpg", output);
+
+  imshow("ORIGINAL", input);
+  imshow("BLURRED", output);
+
+  waitKey();
 
 	return 0;
 }
