@@ -55,7 +55,7 @@ void image_blur(const cv::Mat& input, cv::Mat& output){
 	SAFE_CALL(cudaMemcpy(d_input, input.ptr(), colorBytes, cudaMemcpyHostToDevice), "CUDA Memcpy Host To Device Failed");
 
   
-	const dim3 block(64, 64);
+	const dim3 block(32, 32);
 
 	const dim3 grid((int)ceil((float)input.rows / block.x), (int)ceil((float)input.cols/ block.y));
 	printf("image_blur_kernel<<<(%d, %d) , (%d, %d)>>>\n", grid.x, grid.y, block.x, block.y);

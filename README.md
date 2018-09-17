@@ -12,9 +12,15 @@ Include a Pdf file with the results of the testing for each case. Measure the ti
 
 Rubric:
 
-1. The program shows the original image, and the blurred image.
-2. Applied a 5x5 bluring window.
-3. Images are loaded and displayed correctly.
-4. GPU code is initialized correctly.
-5. The report file has tables with the performance data for the different configurations, as well as for the speedup obtained.
-6. The report file has the computer's characteristics, as well as the conclusions.
+1. The program shows the original image, and the blurred image. *Complete*
+2. Applied a 5x5 bluring window. *Complete*
+3. Images are loaded and displayed correctly. *Complete*
+4. GPU code is initialized correctly. *Complete*
+5. The report file has tables with the performance data for the different configurations, as well as for the speedup obtained. *Complete*
+6. The report file has the computer's characteristics, as well as the conclusions. *Complete*
+
+**NOTES**
+
+1. There is an error when using a block of 64x64 threads: you end up using more threads than is allowed per block. When I tested your code with said configuration, it produced an incorrect image. Changing the configuration of the block to 32x32, or 16x64, etc, corrects the issue.
+
+**Grade: 95**
